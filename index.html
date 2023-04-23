@@ -1,0 +1,41 @@
+<div id="result"></div>
+
+<script>
+  const request = new XMLHttpRequest();
+  request.open('GET', 'source.json', true);
+  request.onload = function() {
+    if (request.status >= 200 && request.status < 400) {
+      let array = JSON.parse(request.responseText);
+      let result = array.reduce((r, { name, group,assistant, ...object }) => {
+        if (assistant == true) {
+        let temp = r.find((o) => o.group === group && o.assistant === assistant);
+        if (!temp) {
+            temp = { name: name, group, assistant, students: [] };
+            r.push(temp);
+        }
+        return r;
+        } else {
+        let temp = r.find((o) => o.group === group);
+        if (!temp) {
+            temp = { name: name, group, assistant, students: [] };
+            r.push(temp);
+        } else {
+            temp.students.push({ name, group, assistant });
+        }
+        return r;
+        }   
+      }, []);
+     
+
+      const resultDiv = document.getElementById("result");
+      const resultHtml = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+      resultDiv.innerHTML = resultHtml;
+    } else {
+      console.error("Couldn't load data from server");
+    }
+  };
+  request.onerror = function() {
+    console.error("Couldn't connect to server");
+  };
+  request.send();
+</script>
